@@ -28,8 +28,7 @@ const ItemRow: React.FC<Props> = (props: Props) => {
 
     const { item } = props;
 
-    const onSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-        event.preventDefault();
+    const onSelect = () => {
         props.toggleSelected(item);
     };
 

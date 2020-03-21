@@ -3,6 +3,8 @@ import { TodoItem } from "../models/models";
 export const updateTodoInItems = (updatedItem: TodoItem, items: TodoItem[]) => {
     return items.map((item: TodoItem) => {
         if (item.id.toString() === updatedItem.id.toString()) {
+            // Preserve selected status even after update
+            updatedItem.selected = item.selected;
             return updatedItem;
         }
 

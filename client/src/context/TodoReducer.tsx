@@ -42,6 +42,7 @@ export default (state: TodoState, action: TodoAction) => {
                 ...state,
                 loading: false,
                 items: !payload.hasError ? payload.items : [],
+                selectedCount: !payload.hasError ? payload.selectedCount : 0,
                 error: payload.hasError ? payload.error : undefined
             };
         case ActionType.BATCH_DELETE_TODOS_REQUEST:
@@ -51,6 +52,7 @@ export default (state: TodoState, action: TodoAction) => {
                 ...state,
                 loading: false,
                 items: !payload.hasError ? payload.items : [],
+                selectedCount: !payload.hasError ? payload.selectedCount : 0,
                 error: payload.hasError ? payload.error : undefined
             };
         case ActionType.TOGGLE_SELECTED:

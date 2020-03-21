@@ -46,7 +46,7 @@ const Home: React.FC = () => {
     } = context;
 
     useEffect(() => {
-        if (!loading) {
+        if (!loading && isNullOrEmpty(items)) {
             fetchAll();
         }
     }, []);
@@ -61,6 +61,9 @@ const Home: React.FC = () => {
     const toggleAll = () => {
         toggleAllSelected();
     };
+
+    console.log("HOME items", items);
+    console.log("HOME selectedCount", selectedCount);
 
     return (
         <>

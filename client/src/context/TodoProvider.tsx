@@ -106,9 +106,11 @@ export const TodoProvider: React.FC = (props: any) => {
                 state.items
             );
 
+            const selectedCount = countSelected(items);
+
             dispatch({
                 type: ActionType.DELETE_TODO_RESPONSE,
-                payload: { hasError: false, items }
+                payload: { hasError: false, selectedCount, items }
             });
         } catch (error) {
             dispatch({
@@ -135,10 +137,11 @@ export const TodoProvider: React.FC = (props: any) => {
                 response.data,
                 state.items
             );
-
+            const selectedCount = countSelected(items);
+ 
             dispatch({
                 type: ActionType.BATCH_DELETE_TODOS_RESPONSE,
-                payload: { items, hasError: false }
+                payload: { items, selectedCount, hasError: false }
             });
         } catch (error) {
             dispatch({
