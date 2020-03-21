@@ -1,4 +1,4 @@
-import { ActionType, TodoAction, TodoState, TodoItem } from "../models/models";
+import { ActionType, TodoAction, TodoState } from "../models/models";
 
 export default (state: TodoState, action: TodoAction) => {
     const { type, payload } = action;
@@ -13,7 +13,6 @@ export default (state: TodoState, action: TodoAction) => {
                 ...state,
                 loading: false,
                 items: !payload.hasError ? payload.items : [],
-                selectedCount: 0, // Fetch all items happens only once on app start, so no items are selected at that time
                 error: payload.hasError ? payload.error : undefined
             };
         case ActionType.CREATE_TODO_REQUEST:
@@ -28,9 +27,14 @@ export default (state: TodoState, action: TodoAction) => {
                 error: payload.hasError ? payload.error : undefined
             };
         case ActionType.UPDATE_TODO_REQUEST:
-            return { ...state };
+            return { ...state, loading: true };
         case ActionType.UPDATE_TODO_RESPONSE:
-            return { ...state };
+            return {
+                ...state,
+                loading: false,
+                items: !payload.hasError ? payload.items : [],
+                error: payload.hasError ? payload.error : undefined
+            };
         case ActionType.DELETE_TODO_REQUEST:
             return { ...state, loading: true };
         case ActionType.DELETE_TODO_RESPONSE:
@@ -60,6 +64,12 @@ export default (state: TodoState, action: TodoAction) => {
                 ...state,
                 items: payload.items,
                 selectedCount: payload.selectedCount
+            };
+        case ActionType.GET_ITEM_DETAILS:
+            return {
+                ...state,
+                details: !payload.hasError ? payload.details : null,
+                error: payload.hasError ? payload.error : undefined
             };
         default:
             return state;

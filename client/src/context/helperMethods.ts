@@ -1,11 +1,21 @@
 import { TodoItem } from "../models/models";
 
+export const updateTodoInItems = (updatedItem: TodoItem, items: TodoItem[]) => {
+    return items.map((item: TodoItem) => {
+        if (item.id.toString() === updatedItem.id.toString()) {
+            return updatedItem;
+        }
+
+        return item;
+    });
+};
+
 export const removeDeletedItemFromArray = (
     deletedItem: TodoItem,
     items: TodoItem[]
 ): TodoItem[] => {
     return items.filter((item: TodoItem) => {
-        return item.id !== deletedItem.id;
+        return item.id.toString() !== deletedItem.id.toString();
     });
 };
 
@@ -25,7 +35,7 @@ export const removeDeletedItemsFromArray = (
 
 export const doToggleSelected = (itemToToggle: TodoItem, items: TodoItem[]) => {
     return items.map((item: TodoItem) => {
-        if (item.id === itemToToggle.id) {
+        if (item.id.toString() === itemToToggle.id.toString()) {
             item.selected = !item.selected;
         }
 

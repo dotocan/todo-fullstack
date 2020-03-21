@@ -36,6 +36,7 @@ const Home: React.FC = () => {
         selectedCount,
         fetchAll,
         createTodo,
+        updateTodo,
         deleteTodo,
         batchDeleteTodos,
         toggleSelected,
@@ -49,8 +50,6 @@ const Home: React.FC = () => {
             fetchAll();
         }
     }, []);
-
-    console.log(items);
 
     const isNullOrEmpty = (array: TodoItem[]) => {
         if (!array) return true;
@@ -109,6 +108,7 @@ const Home: React.FC = () => {
                                         key={item.id}
                                         item={item}
                                         toggleSelected={toggleSelected}
+                                        updateTodo={updateTodo}
                                         deleteTodo={deleteTodo}
                                     />
                                 );

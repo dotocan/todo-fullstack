@@ -12,7 +12,8 @@ import {
     countSelected,
     doToggleAllSelected,
     removeDeletedItemFromArray,
-    removeDeletedItemsFromArray
+    removeDeletedItemsFromArray,
+    updateTodoInItems
 } from "./helperMethods";
 
 const initialState: TodoState = {
@@ -23,10 +24,12 @@ const initialState: TodoState = {
 
     fetchAll: () => {},
     createTodo: (item: TodoItemToCreate) => {},
+    updateTodo: (item: TodoItem) => {},
     deleteTodo: (item: TodoItem) => {},
     batchDeleteTodos: () => {},
     toggleSelected: (item: TodoItem) => {},
-    toggleAllSelected: () => {}
+    toggleAllSelected: () => {},
+    getItemDetails: (id: string | number) => {},
 };
 
 const rootApiUrl = "http://localhost:8080";
@@ -69,6 +72,26 @@ export const TodoProvider: React.FC = (props: any) => {
             });
         }
     };
+
+    const updateTodo = async (item: TodoItem) =>  {
+        dispatch({ type: ActionType.UPDATE_TODO_REQUEST })
+
+        try {
+            const response = await axios.put(`${rootApiUrl}/items`, item);
+
+            const items = updateTodoInItems(response.data, state.items);
+
+            dispatch({
+                type: ActionType.UPDATE_TODO_RESPONSE,
+                payload: { items, hasError: false }
+            });
+        } catch (error) {
+            dispatch({
+                type: ActionType.UPDATE_TODO_RESPONSE,
+                payload: { hasError: true, error }
+            });
+        }
+    }
 
     const deleteTodo = async (item: TodoItem) => {
         dispatch({ type: ActionType.DELETE_TODO_REQUEST });
@@ -151,8 +174,25 @@ export const TodoProvider: React.FC = (props: any) => {
         });
     };
 
-    // create details component
-    // update todo
+    const getItemDetails = (id: number | string) => {
+        const details = state.items.find((item: TodoItem) => item.id.toString() === id.toString());
+
+        if (details) {
+            dispatch({
+                type: ActionType.GET_ITEM_DETAILS,
+                payload: { details, hasError: false }
+            });
+        } else {
+            dispatch({
+                type: ActionType.GET_ITEM_DETAILS,
+                payload: {
+                    error: { message: "Item not found" },
+                    hasError: true
+                }
+            });
+        }
+    };
+
     // search component
     // pagination
     // progress non dissmissable dialog
@@ -163,13 +203,16 @@ export const TodoProvider: React.FC = (props: any) => {
                 loading: state.loading,
                 error: state.error,
                 items: state.items,
+                details: state.details,
                 selectedCount: state.selectedCount,
                 fetchAll,
                 createTodo,
+                updateTodo,
                 deleteTodo,
                 batchDeleteTodos,
                 toggleSelected,
-                toggleAllSelected
+                toggleAllSelected,
+                getItemDetails
             }}
         >
             {props.children}
