@@ -4,10 +4,16 @@ import {
     TodoItem,
     TodoState,
     ActionType,
-    TodoError,
     TodoItemToCreate
 } from "../models/models";
 import axios from "axios";
+import {
+    doToggleSelected,
+    countSelected,
+    doToggleAllSelected,
+    removeDeletedItemFromArray,
+    removeDeletedItemsFromArray
+} from "./helperMethods";
 
 const initialState: TodoState = {
     items: [] as TodoItem[],
@@ -19,7 +25,8 @@ const initialState: TodoState = {
     createTodo: (item: TodoItemToCreate) => {},
     deleteTodo: (item: TodoItem) => {},
     batchDeleteTodos: () => {},
-    toggleSelected: (item: TodoItem) => {}
+    toggleSelected: (item: TodoItem) => {},
+    toggleAllSelected: () => {}
 };
 
 const rootApiUrl = "http://localhost:8080";
@@ -36,12 +43,12 @@ export const TodoProvider: React.FC = (props: any) => {
             const response = await axios.get(`${rootApiUrl}/items`);
             dispatch({
                 type: ActionType.FETCH_TODOS_RESPONSE,
-                payload: response.data
+                payload: { items: response.data, hasError: false }
             });
         } catch (error) {
             dispatch({
                 type: ActionType.FETCH_TODOS_RESPONSE,
-                payload: { error }
+                payload: { hasError: true, error }
             });
         }
     };
@@ -53,12 +60,12 @@ export const TodoProvider: React.FC = (props: any) => {
             const response = await axios.post(`${rootApiUrl}/items`, item);
             dispatch({
                 type: ActionType.CREATE_TODO_RESPONSE,
-                payload: response.data
+                payload: { createdItem: response.data, hasError: false }
             });
         } catch (error) {
             dispatch({
                 type: ActionType.CREATE_TODO_RESPONSE,
-                payload: { error }
+                payload: { hasError: true, error }
             });
         }
     };
@@ -70,15 +77,20 @@ export const TodoProvider: React.FC = (props: any) => {
             const response = await axios.delete(
                 `${rootApiUrl}/items/${item.id}`
             );
+
+            const items = removeDeletedItemFromArray(
+                response.data,
+                state.items
+            );
+
             dispatch({
                 type: ActionType.DELETE_TODO_RESPONSE,
-                payload: response.data
+                payload: { hasError: false, items }
             });
-            dispatch({ type: ActionType.COUNT_SELECTED })
         } catch (error) {
             dispatch({
                 type: ActionType.DELETE_TODO_RESPONSE,
-                payload: { error }
+                payload: { hasError: true, error }
             });
         }
     };
@@ -95,29 +107,54 @@ export const TodoProvider: React.FC = (props: any) => {
                 `${rootApiUrl}/items/batch-delete`,
                 selectedItems
             );
+
+            const items = removeDeletedItemsFromArray(
+                response.data,
+                state.items
+            );
+
             dispatch({
                 type: ActionType.BATCH_DELETE_TODOS_RESPONSE,
-                payload: response.data
+                payload: { items, hasError: false }
             });
-            dispatch({ type: ActionType.COUNT_SELECTED });
         } catch (error) {
             dispatch({
                 type: ActionType.BATCH_DELETE_TODOS_RESPONSE,
-                payload: { error }
+                payload: { hasError: true, error }
             });
         }
     };
 
     const toggleSelected = (item: TodoItem) => {
-        dispatch({ type: ActionType.TOGGLE_SELECTED, payload: item });
-        dispatch({ type: ActionType.COUNT_SELECTED });
+        const items = doToggleSelected(item, state.items);
+        const selectedCount = countSelected(items);
+
+        dispatch({
+            type: ActionType.TOGGLE_SELECTED,
+            payload: {
+                items,
+                selectedCount
+            }
+        });
+    };
+
+    const toggleAllSelected = () => {
+        const items = doToggleAllSelected(state.items);
+        const selectedCount = countSelected(items);
+
+        dispatch({
+            type: ActionType.TOGGLE_ALL_SELECTED,
+            payload: {
+                items,
+                selectedCount
+            }
+        });
     };
 
     // create details component
     // update todo
     // search component
     // pagination
-    // select all
     // progress non dissmissable dialog
 
     return (
@@ -131,7 +168,8 @@ export const TodoProvider: React.FC = (props: any) => {
                 createTodo,
                 deleteTodo,
                 batchDeleteTodos,
-                toggleSelected
+                toggleSelected,
+                toggleAllSelected
             }}
         >
             {props.children}

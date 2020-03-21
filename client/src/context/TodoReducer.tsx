@@ -12,8 +12,9 @@ export default (state: TodoState, action: TodoAction) => {
             return {
                 ...state,
                 loading: false,
-                items: !hasError(payload) ? payload : [],
-                error: hasError(payload) ? payload.error : undefined
+                items: !payload.hasError ? payload.items : [],
+                selectedCount: 0, // Fetch all items happens only once on app start, so no items are selected at that time
+                error: payload.hasError ? payload.error : undefined
             };
         case ActionType.CREATE_TODO_REQUEST:
             return { ...state, loading: true };
@@ -21,8 +22,10 @@ export default (state: TodoState, action: TodoAction) => {
             return {
                 ...state,
                 loading: false,
-                items: !hasError(payload) ? [...state.items, payload] : [],
-                error: hasError(payload) ? payload.error : undefined
+                items: !payload.hasError
+                    ? [...state.items, payload.createdItem]
+                    : [],
+                error: payload.hasError ? payload.error : undefined
             };
         case ActionType.UPDATE_TODO_REQUEST:
             return { ...state };
@@ -34,10 +37,8 @@ export default (state: TodoState, action: TodoAction) => {
             return {
                 ...state,
                 loading: false,
-                items: !hasError(payload)
-                    ? removeDeletedItemFromArray(payload, state.items)
-                    : [],
-                error: hasError(payload) ? payload.error : undefined
+                items: !payload.hasError ? payload.items : [],
+                error: payload.hasError ? payload.error : undefined
             };
         case ActionType.BATCH_DELETE_TODOS_REQUEST:
             return { ...state, loading: true };
@@ -45,72 +46,22 @@ export default (state: TodoState, action: TodoAction) => {
             return {
                 ...state,
                 loading: false,
-                items: !hasError(payload)
-                    ? removeDeletedItemsFromArray(payload, state.items)
-                    : [],
-                error: hasError(payload) ? payload.error : undefined
+                items: !payload.hasError ? payload.items : [],
+                error: payload.hasError ? payload.error : undefined
             };
         case ActionType.TOGGLE_SELECTED:
             return {
                 ...state,
-                items: toggleSelected(action.payload as TodoItem, state.items)
+                items: payload.items,
+                selectedCount: payload.selectedCount
             };
-        case ActionType.COUNT_SELECTED:
+        case ActionType.TOGGLE_ALL_SELECTED:
             return {
                 ...state,
-                selectedCount: countSelected(state.items)
+                items: payload.items,
+                selectedCount: payload.selectedCount
             };
         default:
             return state;
     }
-};
-
-const hasError = (payload: any) => {
-    if (payload.error) {
-        return true;
-    }
-
-    return false;
-};
-
-const removeDeletedItemFromArray = (
-    deletedItem: TodoItem,
-    items: TodoItem[]
-): TodoItem[] => {
-    return items.filter((item: TodoItem) => {
-        return item.id !== deletedItem.id;
-    });
-};
-
-const removeDeletedItemsFromArray = (
-    deletedItems: TodoItem[],
-    items: TodoItem[]
-): TodoItem[] => {
-    const removedIds = deletedItems.map((deletedItem: TodoItem) => {
-        return deletedItem.id;
-    });
-
-    return items.filter((item: TodoItem) => {
-        // Return items that don't have same id as deleted items
-        return !removedIds.includes(item.id);
-    });
-};
-
-const toggleSelected = (itemToToggle: TodoItem, items: TodoItem[]) => {
-    return items.map((item: TodoItem) => {
-        if (item.id === itemToToggle.id) {
-            item.selected = !item.selected;
-        }
-
-        return item;
-    });
-};
-
-const countSelected = (items: TodoItem[]) => {
-    let count = 0;
-    items.forEach((item: TodoItem) => {
-        if (item.selected) count++;
-    });
-
-    return count;
 };

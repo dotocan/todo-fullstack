@@ -110,7 +110,6 @@ const CreateTodoDialog: React.FC<Props> = props => {
 
                     <TextField
                         className={classes.input}
-                        autoFocus
                         id="description"
                         label="Description"
                         fullWidth

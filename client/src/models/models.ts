@@ -23,6 +23,7 @@ export interface TodoState {
     deleteTodo: (item: TodoItem) => void;
     batchDeleteTodos: () => void;
     toggleSelected: (item: TodoItem) => void;
+    toggleAllSelected:  () => void;
 }
 
 export interface TodoAction {
@@ -52,5 +53,5 @@ export enum ActionType {
     BATCH_DELETE_TODOS_REQUEST = "BATCH_DELETE_TODOS_REQUEST",
     BATCH_DELETE_TODOS_RESPONSE = "BATCH_DELETE_TODOS_RESPONSE",
     TOGGLE_SELECTED = "TOGGLE_SELECTED",
-    COUNT_SELECTED = "COUNT_SELECTED"
+    TOGGLE_ALL_SELECTED = "TOGGLE_ALL_SELECTED",
 }

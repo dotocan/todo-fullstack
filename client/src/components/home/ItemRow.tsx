@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { TodoItem } from "../../models/models";
 import { TableRow, TableCell, Checkbox, makeStyles } from "@material-ui/core";
 import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
@@ -19,10 +19,6 @@ const ItemRow: React.FC<Props> = (props: Props) => {
 
     const { item } = props;
 
-    // Using state variable in checkbox to prevent 'changing an uncontrolled input' warning
-    // https://stackoverflow.com/questions/37427508/react-changing-an-uncontrolled-input
-    const [selected, setSelected] = useState(item.selected);
-
     const onSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
         props.toggleSelected(item);
@@ -36,8 +32,10 @@ const ItemRow: React.FC<Props> = (props: Props) => {
         <TableRow className={item.selected ? classes.selected : ""}>
             <TableCell padding="checkbox">
                 <Checkbox
-                    indeterminate={false} // numSelected > 0 && numSelected < rowCount
-                    checked={selected} // rowCount > 0 && numSelected === rowCount
+                    indeterminate={false}
+                    // Setting true or false manually to prevent 'changing an uncontrolled input' warning
+                    // https://stackoverflow.com/questions/37427508/react-changing-an-uncontrolled-input
+                    checked={item.selected ? true : false}
                     onChange={onSelect}
                 />
             </TableCell>

@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 
-import { TodoItem, TodoItemToCreate } from "../../models/models";
+import { TodoItem } from "../../models/models";
 import ItemRow from "./ItemRow";
 import {
     TableContainer,
@@ -39,6 +39,7 @@ const Home: React.FC = () => {
         deleteTodo,
         batchDeleteTodos,
         toggleSelected,
+        toggleAllSelected,
         loading,
         error
     } = context;
@@ -51,23 +52,15 @@ const Home: React.FC = () => {
 
     console.log(items);
 
-    const createTodoItem = (item: TodoItemToCreate) => {
-        createTodo(item);
-    };
-
-    const onSelectAllOnPage = () => {
-        // TODO implement
-    };
-
-    const onSelectAll = () => {
-        // TODO implement
-    };
-
     const isNullOrEmpty = (array: TodoItem[]) => {
         if (!array) return true;
         if (array.length === 0) return true;
 
         return false;
+    };
+
+    const toggleAll = () => {
+        toggleAllSelected();
     };
 
     return (
@@ -91,9 +84,15 @@ const Home: React.FC = () => {
                             <TableRow>
                                 <TableCell padding="checkbox">
                                     <Checkbox
-                                        indeterminate={false} // numSelected > 0 && numSelected < rowCount
-                                        checked={false} // rowCount > 0 && numSelected === rowCount
-                                        onChange={onSelectAllOnPage}
+                                        indeterminate={false}
+                                        // Setting true or false manually to prevent 'changing an uncontrolled input' warning
+                                        // https://stackoverflow.com/questions/37427508/react-changing-an-uncontrolled-input
+                                        checked={
+                                            selectedCount === items.length
+                                                ? true
+                                                : false
+                                        }
+                                        onChange={toggleAll}
                                     />
                                 </TableCell>
                                 <TableCell>Title</TableCell>
