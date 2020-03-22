@@ -19,6 +19,8 @@ import {
 const initialState: TodoState = {
     items: [] as TodoItem[],
     selectedCount: 0,
+    itemsPerPage: 5,
+    currentPage: 1,
     loading: false,
     error: undefined,
 
@@ -30,6 +32,8 @@ const initialState: TodoState = {
     toggleSelected: (item: TodoItem) => {},
     toggleAllSelected: () => {},
     getItemDetails: (id: string | number) => {},
+    previousPage: () => {},
+    nextPage: () => {}
 };
 
 const rootApiUrl = "http://localhost:8080";
@@ -73,8 +77,8 @@ export const TodoProvider: React.FC = (props: any) => {
         }
     };
 
-    const updateTodo = async (item: TodoItem) =>  {
-        dispatch({ type: ActionType.UPDATE_TODO_REQUEST })
+    const updateTodo = async (item: TodoItem) => {
+        dispatch({ type: ActionType.UPDATE_TODO_REQUEST });
 
         try {
             const response = await axios.put(`${rootApiUrl}/items`, item);
@@ -91,7 +95,7 @@ export const TodoProvider: React.FC = (props: any) => {
                 payload: { hasError: true, error }
             });
         }
-    }
+    };
 
     const deleteTodo = async (item: TodoItem) => {
         dispatch({ type: ActionType.DELETE_TODO_REQUEST });
@@ -138,7 +142,7 @@ export const TodoProvider: React.FC = (props: any) => {
                 state.items
             );
             const selectedCount = countSelected(items);
- 
+
             dispatch({
                 type: ActionType.BATCH_DELETE_TODOS_RESPONSE,
                 payload: { items, selectedCount, hasError: false }
@@ -178,7 +182,9 @@ export const TodoProvider: React.FC = (props: any) => {
     };
 
     const getItemDetails = (id: number | string) => {
-        const details = state.items.find((item: TodoItem) => item.id.toString() === id.toString());
+        const details = state.items.find(
+            (item: TodoItem) => item.id.toString() === id.toString()
+        );
 
         if (details) {
             dispatch({
@@ -196,9 +202,26 @@ export const TodoProvider: React.FC = (props: any) => {
         }
     };
 
+    const previousPage = () => {
+        dispatch({
+            type: ActionType.CHANGE_PAGE,
+            payload: { currentPage: state.currentPage - 1 }
+        });
+    };
+
+    const nextPage = () => {
+        dispatch({
+            type: ActionType.CHANGE_PAGE,
+            payload: { currentPage: state.currentPage + 1 }
+        });
+    };
+
     // search component
-    // pagination
-    // progress non dissmissable dialog
+    // set limit to title and description length on frontend
+    // set limit to title and description length on backend
+    // remove empty files and cleanup code where needed
+    // implement create 50 dummy items on frontend
+    // implement create 50 dummy items on backend
 
     return (
         <TodoContext.Provider
@@ -208,6 +231,8 @@ export const TodoProvider: React.FC = (props: any) => {
                 items: state.items,
                 details: state.details,
                 selectedCount: state.selectedCount,
+                itemsPerPage: state.itemsPerPage,
+                currentPage: state.currentPage,
                 fetchAll,
                 createTodo,
                 updateTodo,
@@ -215,7 +240,9 @@ export const TodoProvider: React.FC = (props: any) => {
                 batchDeleteTodos,
                 toggleSelected,
                 toggleAllSelected,
-                getItemDetails
+                getItemDetails,
+                previousPage,
+                nextPage
             }}
         >
             {props.children}

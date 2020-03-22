@@ -73,6 +73,12 @@ export default (state: TodoState, action: TodoAction) => {
                 details: !payload.hasError ? payload.details : null,
                 error: payload.hasError ? payload.error : undefined
             };
+        case ActionType.CHANGE_PAGE: {
+            return {
+                ...state,
+                currentPage: payload.currentPage
+            };
+        }
         default:
             return state;
     }

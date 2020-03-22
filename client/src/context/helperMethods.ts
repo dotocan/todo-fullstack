@@ -3,7 +3,9 @@ import { TodoItem } from "../models/models";
 export const updateTodoInItems = (updatedItem: TodoItem, items: TodoItem[]) => {
     return items.map((item: TodoItem) => {
         if (item.id.toString() === updatedItem.id.toString()) {
-            // Preserve selected status even after update
+            // Whether or not item is selected in list is not preserved on the server.
+            // After updating item and receiving updated object from the server, 
+            // we need to manually set selected status to what it was before updating
             updatedItem.selected = item.selected;
             return updatedItem;
         }
@@ -30,7 +32,6 @@ export const removeDeletedItemsFromArray = (
     });
 
     return items.filter((item: TodoItem) => {
-        // Return items that don't have same id as deleted items
         return !removedIds.includes(item.id);
     });
 };

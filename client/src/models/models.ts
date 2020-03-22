@@ -15,6 +15,8 @@ export interface TodoItemToCreate {
 export interface TodoState {
     items: TodoItem[];
     selectedCount: number;
+    itemsPerPage: number;
+    currentPage: number;
     details?: TodoItem;
     loading: boolean;
     error?: TodoError;
@@ -27,6 +29,8 @@ export interface TodoState {
     toggleSelected: (item: TodoItem) => void;
     toggleAllSelected: () => void;
     getItemDetails: (id: number | string) => void;
+    previousPage: () => void;
+    nextPage: () => void;
 }
 
 export interface TodoAction {
@@ -57,5 +61,6 @@ export enum ActionType {
     BATCH_DELETE_TODOS_RESPONSE = "BATCH_DELETE_TODOS_RESPONSE",
     TOGGLE_SELECTED = "TOGGLE_SELECTED",
     TOGGLE_ALL_SELECTED = "TOGGLE_ALL_SELECTED",
-    GET_ITEM_DETAILS = "GET_ITEM_DETAILS"
+    GET_ITEM_DETAILS = "GET_ITEM_DETAILS",
+    CHANGE_PAGE = "CHANGE_PAGE"
 }
