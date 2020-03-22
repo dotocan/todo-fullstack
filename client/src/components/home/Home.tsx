@@ -1,26 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import { TodoItem } from "../../models/models";
-import ItemRow from "./ItemRow";
 import {
-    TableContainer,
-    Paper,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    Checkbox,
-    TableBody,
     makeStyles,
-    Typography,
-    Fab
+    TextField,
+    Button
 } from "@material-ui/core";
 import { TodoContext } from "../../context/TodoProvider";
 import EmptyState from "../states/EmptyState";
 import ErrorState from "../states/ErrorState";
 import CreateTodoDialog from "../dialogs/CreateTodoDialog";
 import BatchDeleteConfirmationDialog from "../dialogs/BatchDeleteConfirmationDialog";
-import { NavigateBefore, NavigateNext } from "@material-ui/icons";
+import TodoTable from "./TodoTable";
 
 const Home: React.FC = () => {
     const useStyles = makeStyles({
@@ -29,16 +20,6 @@ const Home: React.FC = () => {
             display: "flex",
             flexDirection: "row-reverse",
             marginBottom: "2%"
-        },
-        paginationContainter: {
-            width: "100%",
-            display: "flex",
-            flexDirection: "row-reverse",
-            alignItems: "center",
-            margin: "2% auto"
-        },
-        paginationItem: {
-            margin: "0 1%"
         }
     });
     const classes = useStyles();
@@ -62,9 +43,7 @@ const Home: React.FC = () => {
         error
     } = context;
 
-    const [maxPage, setMaxPage] = useState(
-        Math.ceil(items.length / itemsPerPage)
-    );
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         if (!loading && isNullOrEmpty(items)) {
@@ -79,27 +58,21 @@ const Home: React.FC = () => {
         return false;
     };
 
-    const toggleAll = () => {
-        toggleAllSelected();
+    const returnSearchResults = () => {
+        const results = items.filter((item: TodoItem) => {
+            return (
+                item.title.includes(searchQuery) ||
+                (item.description && item.description.includes(searchQuery))
+            );
+        });
+
+        console.log(results);
     };
 
-    const getItemsForCurrentPage = () => {
-        let start;
-        let end;
-        let maxPage = Math.ceil(items.length / itemsPerPage);
-
-        if (currentPage === 1) {
-            start = 0;
-            end = itemsPerPage;
-        } else if (currentPage === maxPage) {
-            start = currentPage * itemsPerPage - itemsPerPage;
-            end = items.length;
-        } else {
-            start = currentPage * itemsPerPage - itemsPerPage;
-            end = start + itemsPerPage;
-        }
-
-        return items.slice(start, end);
+    const onChangeSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value === "" || !e.target.value)
+            console.log("not in search mode");
+        setSearchQuery(e.target.value);
     };
 
     return (
@@ -112,73 +85,38 @@ const Home: React.FC = () => {
                         batchDeleteTodos={batchDeleteTodos}
                     />
                 ) : null}
+
+                <Button variant="outlined" onClick={returnSearchResults}>
+                    Search
+                </Button>
+
+                <TextField
+                    autoFocus
+                    id="search"
+                    label="search"
+                    fullWidth
+                    variant="outlined"
+                    value={searchQuery}
+                    onChange={onChangeSearchQuery}
+                ></TextField>
             </div>
 
             {error ? (
                 <ErrorState error={error} />
             ) : !isNullOrEmpty(items) ? (
                 <>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell padding="checkbox">
-                                        <Checkbox
-                                            indeterminate={false}
-                                            // Setting true or false manually to prevent 'changing an uncontrolled input' warning
-                                            // https://stackoverflow.com/questions/37427508/react-changing-an-uncontrolled-input
-                                            checked={
-                                                selectedCount === items.length
-                                                    ? true
-                                                    : false
-                                            }
-                                            onChange={toggleAll}
-                                        />
-                                    </TableCell>
-                                    <TableCell>Title</TableCell>
-                                    <TableCell>Completed</TableCell>
-                                    <TableCell>View</TableCell>
-                                    <TableCell>Toggle completed</TableCell>
-                                    <TableCell>Delete</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {getItemsForCurrentPage().map(item => {
-                                    return (
-                                        <ItemRow
-                                            key={item.id}
-                                            item={item}
-                                            toggleSelected={toggleSelected}
-                                            updateTodo={updateTodo}
-                                            deleteTodo={deleteTodo}
-                                        />
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-
-                    <div className={classes.paginationContainter}>
-                        <Fab
-                            onClick={nextPage}
-                            disabled={
-                                currentPage === Math.ceil(items.length / itemsPerPage)
-                            }
-                        >
-                            <NavigateNext />
-                        </Fab>
-
-                        <Typography
-                            variant="h6"
-                            className={classes.paginationItem}
-                        >
-                            {currentPage}
-                        </Typography>
-
-                        <Fab onClick={previousPage} disabled={currentPage === 1}>
-                            <NavigateBefore />
-                        </Fab>
-                    </div>
+                    <TodoTable
+                        items={items}
+                        selectedCount={selectedCount}
+                        itemsPerPage={itemsPerPage}
+                        currentPage={currentPage}
+                        updateTodo={updateTodo}
+                        deleteTodo={deleteTodo}
+                        toggleSelected={toggleSelected}
+                        toggleAll={toggleAllSelected}
+                        nextPage={nextPage}
+                        previousPage={previousPage}
+                    />
                 </>
             ) : (
                 <EmptyState />
