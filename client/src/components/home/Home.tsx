@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { Filter } from "../../models/models";
 import { makeStyles, TextField } from "@material-ui/core";

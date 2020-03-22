@@ -1,6 +1,6 @@
 import React from "react";
 import { TodoItem } from "../../models/models";
-import { Typography, Button, Fab, makeStyles } from "@material-ui/core";
+import { Typography, Button, makeStyles } from "@material-ui/core";
 
 interface Props {
     item: TodoItem;

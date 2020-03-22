@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { TodoContext } from "../../context/TodoProvider";
 import {
     makeStyles,
@@ -18,8 +18,6 @@ const ProgressDialog = () => {
 
     const context = useContext(TodoContext);
     const { loading } = context;
-
-    useEffect(() => {}, [loading]);
 
     return (
         <Dialog open={loading} disableBackdropClick={true}>

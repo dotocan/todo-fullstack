@@ -19,7 +19,7 @@ createConnection({
     entities: [TodoItem],
     synchronize: true
 })
-    .then(async connection => {
+    .then(async (connection: any) => {
         const app = express();
 
         app.use(cors());
@@ -31,7 +31,7 @@ createConnection({
          * GET /items
          * Gets all items from the database
          */
-        app.get("/items", async (req, res) => {
+        app.get("/items", async (req: any, res: any) => {
             try {
                 const items = await itemRepository.find();
                 res.status(200).send(items);
@@ -46,7 +46,7 @@ createConnection({
          * GET /items/:id
          * Finds the item by id
          */
-        app.get("/items/:id", async (req, res) => {
+        app.get("/items/:id", async (req: any, res: any) => {
             const itemId = +req.params.id;
 
             try {
@@ -65,7 +65,7 @@ createConnection({
         /**
          * Creates a new item in db
          */
-        app.post("/items", async (req, res) => {
+        app.post("/items", async (req: any, res: any) => {
             const { title, description, completed } = req.body;
 
             try {
@@ -87,7 +87,7 @@ createConnection({
          * PUT /items
          * Update existing item
          */
-        app.put("/items", async (req, res) => {
+        app.put("/items", async (req: any, res: any) => {
             const { id, title, description, completed } = req.body;
 
             try {
@@ -109,7 +109,7 @@ createConnection({
          * DELETE /items/:id
          * Delete existing item by id
          */
-        app.delete("/items/:id", async (req, res) => {
+        app.delete("/items/:id", async (req: any, res: any) => {
             const itemId = +req.params.id;
 
             try {
@@ -126,7 +126,7 @@ createConnection({
             }
         });
 
-        app.post("/items/batch-delete", async (req, res) => {
+        app.post("/items/batch-delete", async (req: any, res: any) => {
             const items = req.body;
             const removedItems = [] as TodoItem[];
 
