@@ -302,12 +302,6 @@ export const TodoProvider: React.FC = (props: any) => {
         });
     };
 
-    // set limit to title and description length on frontend
-    // set limit to title and description length on backend
-    // remove empty files and cleanup code where needed
-    // implement create 50 dummy items on frontend
-    // implement create 50 dummy items on backend
-
     return (
         <TodoContext.Provider
             value={{

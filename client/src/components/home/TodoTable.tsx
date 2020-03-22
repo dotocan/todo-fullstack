@@ -32,15 +32,16 @@ const TodoTable: React.FC<Props> = props => {
         goToPage
     } = props;
 
+    let numberOfPages = Math.ceil(items.length / itemsPerPage);
+
     const getItemsForCurrentPage = () => {
         let start;
         let end;
-        let maxPage = Math.ceil(items.length / itemsPerPage);
 
         if (currentPage === 1) {
             start = 0;
             end = itemsPerPage;
-        } else if (currentPage === maxPage) {
+        } else if (currentPage === numberOfPages) {
             start = currentPage * itemsPerPage - itemsPerPage;
             end = items.length;
         } else {
@@ -51,10 +52,39 @@ const TodoTable: React.FC<Props> = props => {
         return items.slice(start, end);
     };
 
-    // When some action reduces number of existing pages and user
-    // was on a currently non-existing page, reset him to the currently max page
-    if (currentPage > Math.ceil(items.length / itemsPerPage)) {
-        goToPage(Math.ceil(items.length / itemsPerPage));
+    // This if statement fixes several issues:
+    /*
+        - First problem:
+        When user is on page 5 and filtering reduces results to only two pages, page 5 stops existing.
+        This piece of logic was introduced to fix it. It sets the table to currently available max page.
+        if (currentPage(5) > numberOfPages(2)) { 
+            goToPage(numberOfPages); 
+        } 
+
+        - Above fix introduces a new issue: 
+        When filtering returns no results number of pages gets calculated as 0. 
+        if (currentPage(5) > numberOfPages(0)){
+            goToPage(0);
+        }
+        will set currentPage to 0, but page 0 doesn't exist, which causes the table to break.
+        To fix this, statement needs to get expanded to handle the case when current page 
+        is set to 0
+        if (currentPage > numberOfPages || currentPage === 0) {
+            goToPage(numberOfPages);
+        }
+        
+        - Second fix causes infinite loop. When filtering returns 0 results, currentPage will be set to 0
+        which will trigger the if statement to set it to max page available. But max page available for
+        0 results is still 0 so the if statement gets triggered forever and breaks the app. To fix this final
+        issue, we need to check whether there are any results available. If there are none because of
+        the current filtering, don't even go to any page. When user removes the filtering and results become
+        available again (!arrayIsNullOrEmpty(items)), only then check for other conditions described above.
+    */
+    if (
+        !arrayIsNullOrEmpty(items) &&
+        (currentPage > numberOfPages || currentPage === 0)
+    ) {
+        goToPage(numberOfPages);
     }
 
     const nextPage = () => {
@@ -64,8 +94,6 @@ const TodoTable: React.FC<Props> = props => {
     const previousPage = () => {
         goToPage(currentPage - 1);
     };
-
-    console.log('TABLE filtereItems', items);
 
     return (
         <>
@@ -98,7 +126,7 @@ const TodoTable: React.FC<Props> = props => {
                         nextPage={nextPage}
                         previousPage={previousPage}
                         currentPage={currentPage}
-                        maxPage={Math.ceil(items.length / itemsPerPage)}
+                        maxPage={numberOfPages}
                     />
                 </>
             )}
