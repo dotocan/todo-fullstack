@@ -63,7 +63,7 @@ const Home: React.FC = () => {
         onChangeFilter(event.target.value as Filter);
     };
 
-    console.log('HOME filtereItems', filteredItems);
+    console.log("HOME filtereItems", filteredItems);
 
     return (
         <>
@@ -76,37 +76,47 @@ const Home: React.FC = () => {
                     />
                 ) : null}
 
-                <TextField
-                    id="filter-by"
-                    select
-                    label="Filter items"
-                    value={filter}
-                    onChange={onFilterChange}
-                    SelectProps={{
-                        native: true
-                    }}
-                    variant="outlined"
-                    className={classes.action}
-                >
-                    <option key={Filter.ALL} value={Filter.ALL}>
-                        All
-                    </option>
-                    <option key={Filter.COMPLETED} value={Filter.COMPLETED}>
-                        Only completed
-                    </option>
-                    <option key={Filter.UNCOMPLETED} value={Filter.UNCOMPLETED}>
-                        Only uncompleted
-                    </option>
-                </TextField>
+                {!arrayIsNullOrEmpty(items) && (
+                    <>
+                        <TextField
+                            id="filter-by"
+                            select
+                            label="Filter items"
+                            value={filter}
+                            onChange={onFilterChange}
+                            SelectProps={{
+                                native: true
+                            }}
+                            variant="outlined"
+                            className={classes.action}
+                        >
+                            <option key={Filter.ALL} value={Filter.ALL}>
+                                All
+                            </option>
+                            <option
+                                key={Filter.COMPLETED}
+                                value={Filter.COMPLETED}
+                            >
+                                Only completed
+                            </option>
+                            <option
+                                key={Filter.UNCOMPLETED}
+                                value={Filter.UNCOMPLETED}
+                            >
+                                Only uncompleted
+                            </option>
+                        </TextField>
 
-                <TextField
-                    id="search"
-                    label="search"
-                    fullWidth
-                    variant="outlined"
-                    value={searchQuery}
-                    onChange={onSearchQueryChange}
-                ></TextField>
+                        <TextField
+                            id="search"
+                            label="search"
+                            fullWidth
+                            variant="outlined"
+                            value={searchQuery}
+                            onChange={onSearchQueryChange}
+                        ></TextField>
+                    </>
+                )}
             </div>
 
             {error ? (
