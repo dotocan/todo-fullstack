@@ -18,6 +18,9 @@ interface Props {
 
 const BatchDeleteConfirmationDialog: React.FC<Props> = props => {
     const useStyles = makeStyles({
+        btn: {
+            marginLeft: "1%"
+        },
         question: {
             margin: "2% auto"
         },
@@ -46,7 +49,12 @@ const BatchDeleteConfirmationDialog: React.FC<Props> = props => {
 
     return (
         <>
-            <Fab onClick={openDialog} color="secondary" variant="extended">
+            <Fab
+                onClick={openDialog}
+                color="secondary"
+                variant="extended"
+                className={classes.btn}
+            >
                 <Delete />
                 {`Delete ${selectedCount} items`}
             </Fab>

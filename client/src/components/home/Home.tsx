@@ -1,17 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 
-import { TodoItem } from "../../models/models";
-import {
-    makeStyles,
-    TextField,
-    Button
-} from "@material-ui/core";
+import { Filter } from "../../models/models";
+import { makeStyles, TextField } from "@material-ui/core";
 import { TodoContext } from "../../context/TodoProvider";
 import EmptyState from "../states/EmptyState";
 import ErrorState from "../states/ErrorState";
 import CreateTodoDialog from "../dialogs/CreateTodoDialog";
 import BatchDeleteConfirmationDialog from "../dialogs/BatchDeleteConfirmationDialog";
 import TodoTable from "./TodoTable";
+import { arrayIsNullOrEmpty } from "../../context/helperMethods";
 
 const Home: React.FC = () => {
     const useStyles = makeStyles({
@@ -20,6 +17,9 @@ const Home: React.FC = () => {
             display: "flex",
             flexDirection: "row-reverse",
             marginBottom: "2%"
+        },
+        action: {
+            marginLeft: "1%"
         }
     });
     const classes = useStyles();
@@ -27,9 +27,12 @@ const Home: React.FC = () => {
     const context = useContext(TodoContext);
     const {
         items,
+        filteredItems,
         selectedCount,
         itemsPerPage,
         currentPage,
+        filter,
+        searchQuery,
         fetchAll,
         createTodo,
         updateTodo,
@@ -37,43 +40,30 @@ const Home: React.FC = () => {
         batchDeleteTodos,
         toggleSelected,
         toggleAllSelected,
-        nextPage,
-        previousPage,
+        goToPage,
+        onChangeFilter,
+        onChangeSearchQuery,
         loading,
         error
     } = context;
 
-    const [searchQuery, setSearchQuery] = useState("");
-
     useEffect(() => {
-        if (!loading && isNullOrEmpty(items)) {
+        if (!loading && arrayIsNullOrEmpty(items)) {
             fetchAll();
         }
     }, []);
 
-    const isNullOrEmpty = (array: TodoItem[]) => {
-        if (!array) return true;
-        if (array.length === 0) return true;
-
-        return false;
+    const onSearchQueryChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        onChangeSearchQuery(event.target.value);
     };
 
-    const returnSearchResults = () => {
-        const results = items.filter((item: TodoItem) => {
-            return (
-                item.title.includes(searchQuery) ||
-                (item.description && item.description.includes(searchQuery))
-            );
-        });
-
-        console.log(results);
+    const onFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onChangeFilter(event.target.value as Filter);
     };
 
-    const onChangeSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value === "" || !e.target.value)
-            console.log("not in search mode");
-        setSearchQuery(e.target.value);
-    };
+    console.log('HOME filtereItems', filteredItems);
 
     return (
         <>
@@ -86,27 +76,45 @@ const Home: React.FC = () => {
                     />
                 ) : null}
 
-                <Button variant="outlined" onClick={returnSearchResults}>
-                    Search
-                </Button>
+                <TextField
+                    id="filter-by"
+                    select
+                    label="Filter items"
+                    value={filter}
+                    onChange={onFilterChange}
+                    SelectProps={{
+                        native: true
+                    }}
+                    variant="outlined"
+                    className={classes.action}
+                >
+                    <option key={Filter.ALL} value={Filter.ALL}>
+                        All
+                    </option>
+                    <option key={Filter.COMPLETED} value={Filter.COMPLETED}>
+                        Only completed
+                    </option>
+                    <option key={Filter.UNCOMPLETED} value={Filter.UNCOMPLETED}>
+                        Only uncompleted
+                    </option>
+                </TextField>
 
                 <TextField
-                    autoFocus
                     id="search"
                     label="search"
                     fullWidth
                     variant="outlined"
                     value={searchQuery}
-                    onChange={onChangeSearchQuery}
+                    onChange={onSearchQueryChange}
                 ></TextField>
             </div>
 
             {error ? (
                 <ErrorState error={error} />
-            ) : !isNullOrEmpty(items) ? (
+            ) : !arrayIsNullOrEmpty(items) ? (
                 <>
                     <TodoTable
-                        items={items}
+                        items={filteredItems}
                         selectedCount={selectedCount}
                         itemsPerPage={itemsPerPage}
                         currentPage={currentPage}
@@ -114,8 +122,7 @@ const Home: React.FC = () => {
                         deleteTodo={deleteTodo}
                         toggleSelected={toggleSelected}
                         toggleAll={toggleAllSelected}
-                        nextPage={nextPage}
-                        previousPage={previousPage}
+                        goToPage={goToPage}
                     />
                 </>
             ) : (

@@ -4,7 +4,8 @@ import {
     TodoItem,
     TodoState,
     ActionType,
-    TodoItemToCreate
+    TodoItemToCreate,
+    Filter
 } from "../models/models";
 import axios from "axios";
 import {
@@ -13,14 +14,18 @@ import {
     doToggleAllSelected,
     removeDeletedItemFromArray,
     removeDeletedItemsFromArray,
-    updateTodoInItems
+    updateTodoInItems,
+    filterAndSearch
 } from "./helperMethods";
 
 const initialState: TodoState = {
     items: [] as TodoItem[],
+    filteredItems: [] as TodoItem[],
     selectedCount: 0,
     itemsPerPage: 5,
     currentPage: 1,
+    filter: Filter.ALL,
+    searchQuery: "",
     loading: false,
     error: undefined,
 
@@ -32,8 +37,9 @@ const initialState: TodoState = {
     toggleSelected: (item: TodoItem) => {},
     toggleAllSelected: () => {},
     getItemDetails: (id: string | number) => {},
-    previousPage: () => {},
-    nextPage: () => {}
+    goToPage: (page: number) => {},
+    onChangeFilter: (filter: Filter) => {},
+    onChangeSearchQuery: (searchQuery: string) => {}
 };
 
 const rootApiUrl = "http://localhost:8080";
@@ -62,12 +68,25 @@ export const TodoProvider: React.FC = (props: any) => {
 
     const createTodo = async (item: TodoItemToCreate) => {
         dispatch({ type: ActionType.CREATE_TODO_REQUEST });
-
         try {
             const response = await axios.post(`${rootApiUrl}/items`, item);
+
+            // When new todo is created, insert it into original list and
+            // redo filter and search, since it may or may not fit into filteredList
+            const items = [...state.items, response.data];
+            const filteredItems = filterAndSearch(
+                items,
+                state.filter,
+                state.searchQuery
+            );
+
             dispatch({
                 type: ActionType.CREATE_TODO_RESPONSE,
-                payload: { createdItem: response.data, hasError: false }
+                payload: {
+                    items,
+                    filteredItems,
+                    hasError: false
+                }
             });
         } catch (error) {
             dispatch({
@@ -83,11 +102,22 @@ export const TodoProvider: React.FC = (props: any) => {
         try {
             const response = await axios.put(`${rootApiUrl}/items`, item);
 
+            // When todo is updated, insert it into original list and
+            // redo filter and search, since it may or may not fit into filteredList with it's new values
             const items = updateTodoInItems(response.data, state.items);
+            const filteredItems = filterAndSearch(
+                items,
+                state.filter,
+                state.searchQuery
+            );
 
             dispatch({
                 type: ActionType.UPDATE_TODO_RESPONSE,
-                payload: { items, hasError: false }
+                payload: {
+                    items,
+                    filteredItems,
+                    hasError: false
+                }
             });
         } catch (error) {
             dispatch({
@@ -105,16 +135,26 @@ export const TodoProvider: React.FC = (props: any) => {
                 `${rootApiUrl}/items/${item.id}`
             );
 
+            // When todo is deleted, remove it from original and filtered list.
+            // No need to redo filtering and search.
             const items = removeDeletedItemFromArray(
                 response.data,
                 state.items
             );
-
-            const selectedCount = countSelected(items);
+            const filteredItems = removeDeletedItemFromArray(
+                response.data,
+                state.filteredItems
+            );
+            const selectedCount = countSelected(filteredItems);
 
             dispatch({
                 type: ActionType.DELETE_TODO_RESPONSE,
-                payload: { hasError: false, selectedCount, items }
+                payload: {
+                    hasError: false,
+                    selectedCount,
+                    items,
+                    filteredItems
+                }
             });
         } catch (error) {
             dispatch({
@@ -127,7 +167,7 @@ export const TodoProvider: React.FC = (props: any) => {
     const batchDeleteTodos = async () => {
         dispatch({ type: ActionType.BATCH_DELETE_TODOS_REQUEST });
 
-        const selectedItems = state.items.filter((item: TodoItem) => {
+        const selectedItems = state.filteredItems.filter((item: TodoItem) => {
             return item.selected;
         });
 
@@ -137,15 +177,26 @@ export const TodoProvider: React.FC = (props: any) => {
                 selectedItems
             );
 
+            // When todos are deleted, remove them from original and filtered list.
+            // No need to redo filtering and search.
             const items = removeDeletedItemsFromArray(
                 response.data,
                 state.items
             );
-            const selectedCount = countSelected(items);
+            const filteredItems = removeDeletedItemsFromArray(
+                response.data,
+                state.filteredItems
+            );
+            const selectedCount = countSelected(filteredItems);
 
             dispatch({
                 type: ActionType.BATCH_DELETE_TODOS_RESPONSE,
-                payload: { items, selectedCount, hasError: false }
+                payload: {
+                    items,
+                    filteredItems,
+                    selectedCount,
+                    hasError: false
+                }
             });
         } catch (error) {
             dispatch({
@@ -157,12 +208,18 @@ export const TodoProvider: React.FC = (props: any) => {
 
     const toggleSelected = (item: TodoItem) => {
         const items = doToggleSelected(item, state.items);
-        const selectedCount = countSelected(items);
+        const filteredItems = filterAndSearch(
+            items,
+            state.filter,
+            state.searchQuery
+        );
+        const selectedCount = countSelected(filteredItems);
 
         dispatch({
             type: ActionType.TOGGLE_SELECTED,
             payload: {
                 items,
+                filteredItems,
                 selectedCount
             }
         });
@@ -170,12 +227,18 @@ export const TodoProvider: React.FC = (props: any) => {
 
     const toggleAllSelected = () => {
         const items = doToggleAllSelected(state.items);
+        const filteredItems = filterAndSearch(
+            items,
+            state.filter,
+            state.searchQuery
+        );
         const selectedCount = countSelected(items);
 
         dispatch({
             type: ActionType.TOGGLE_ALL_SELECTED,
             payload: {
                 items,
+                filteredItems,
                 selectedCount
             }
         });
@@ -202,21 +265,43 @@ export const TodoProvider: React.FC = (props: any) => {
         }
     };
 
-    const previousPage = () => {
+    const goToPage = (page: number) => {
         dispatch({
             type: ActionType.CHANGE_PAGE,
-            payload: { currentPage: state.currentPage - 1 }
+            payload: { currentPage: page }
         });
     };
 
-    const nextPage = () => {
+    const onChangeFilter = (filter: Filter) => {
+        const filteredItems = filterAndSearch(
+            state.items,
+            filter,
+            state.searchQuery
+        );
+        const selectedCount = countSelected(filteredItems);
+
         dispatch({
-            type: ActionType.CHANGE_PAGE,
-            payload: { currentPage: state.currentPage + 1 }
+            type: ActionType.ON_CHANGE_FILTER,
+            payload: { filter, filteredItems, selectedCount }
         });
     };
 
-    // search component
+    const onChangeSearchQuery = (searchQuery: string) => {
+        // Could be improved with debounce so it doesn't
+        // perform search on every keystroke
+        const filteredItems = filterAndSearch(
+            state.items,
+            state.filter,
+            searchQuery
+        );
+        const selectedCount = countSelected(filteredItems);
+
+        dispatch({
+            type: ActionType.ON_CHANGE_SEARCH_QUERY,
+            payload: { searchQuery, filteredItems, selectedCount }
+        });
+    };
+
     // set limit to title and description length on frontend
     // set limit to title and description length on backend
     // remove empty files and cleanup code where needed
@@ -229,6 +314,9 @@ export const TodoProvider: React.FC = (props: any) => {
                 loading: state.loading,
                 error: state.error,
                 items: state.items,
+                filteredItems: state.filteredItems,
+                filter: state.filter,
+                searchQuery: state.searchQuery,
                 details: state.details,
                 selectedCount: state.selectedCount,
                 itemsPerPage: state.itemsPerPage,
@@ -241,8 +329,9 @@ export const TodoProvider: React.FC = (props: any) => {
                 toggleSelected,
                 toggleAllSelected,
                 getItemDetails,
-                previousPage,
-                nextPage
+                goToPage,
+                onChangeFilter,
+                onChangeSearchQuery
             }}
         >
             {props.children}

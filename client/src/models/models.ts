@@ -14,9 +14,12 @@ export interface TodoItemToCreate {
 
 export interface TodoState {
     items: TodoItem[];
+    filteredItems: TodoItem[];
     selectedCount: number;
     itemsPerPage: number;
     currentPage: number;
+    filter: Filter;
+    searchQuery: string;
     details?: TodoItem;
     loading: boolean;
     error?: TodoError;
@@ -29,8 +32,9 @@ export interface TodoState {
     toggleSelected: (item: TodoItem) => void;
     toggleAllSelected: () => void;
     getItemDetails: (id: number | string) => void;
-    previousPage: () => void;
-    nextPage: () => void;
+    goToPage: (page: number) => void;
+    onChangeFilter: (filter: Filter) => void;
+    onChangeSearchQuery: (searchQuery: string) => void;
 }
 
 export interface TodoAction {
@@ -48,6 +52,12 @@ export interface TextFieldValidation {
     helperText?: string;
 }
 
+export enum Filter {
+    ALL = "ALL",
+    COMPLETED = "COMPLETED",
+    UNCOMPLETED = "UNCOMPLETED"
+}
+
 export enum ActionType {
     FETCH_TODOS_REQUEST = "FETCH_TODOS_REQUEST",
     FETCH_TODOS_RESPONSE = "FETCH_TODOS_RESPONSE ",
@@ -62,5 +72,7 @@ export enum ActionType {
     TOGGLE_SELECTED = "TOGGLE_SELECTED",
     TOGGLE_ALL_SELECTED = "TOGGLE_ALL_SELECTED",
     GET_ITEM_DETAILS = "GET_ITEM_DETAILS",
-    CHANGE_PAGE = "CHANGE_PAGE"
+    CHANGE_PAGE = "CHANGE_PAGE",
+    ON_CHANGE_FILTER = "ON_CHANGE_FILTER",
+    ON_CHANGE_SEARCH_QUERY = "ON_CHANGE_SEARCH_QUERY"
 }

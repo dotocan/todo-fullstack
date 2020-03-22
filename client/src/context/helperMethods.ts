@@ -1,10 +1,10 @@
-import { TodoItem } from "../models/models";
+import { TodoItem, Filter } from "../models/models";
 
 export const updateTodoInItems = (updatedItem: TodoItem, items: TodoItem[]) => {
     return items.map((item: TodoItem) => {
         if (item.id.toString() === updatedItem.id.toString()) {
             // Whether or not item is selected in list is not preserved on the server.
-            // After updating item and receiving updated object from the server, 
+            // After updating item and receiving updated object from the server,
             // we need to manually set selected status to what it was before updating
             updatedItem.selected = item.selected;
             return updatedItem;
@@ -68,6 +68,54 @@ export const doToggleAllSelected = (itemsToToggle: TodoItem[]) => {
 
     // If all items are already selected, unselect them
     return itemsWithSelectedSetTo(itemsToToggle, false);
+};
+
+export const filterAndSearch = (
+    items: TodoItem[],
+    filter: Filter,
+    searchQuery: string
+): TodoItem[] => {
+    let filteredItems = items;
+
+    if (filter === Filter.COMPLETED) {
+        filteredItems = items.filter((item: TodoItem) => {
+            return item.completed;
+        });
+
+        console.log("filterAndSearch, filter is COMPLETED", filteredItems);
+    }
+
+    if (filter === Filter.UNCOMPLETED) {
+        filteredItems = filteredItems.filter((item: TodoItem) => {
+            return !item.completed;
+        });
+
+        console.log("filterAndSearch, filter is UNCOMPLETED", filteredItems);
+    }
+
+    // If search query is not an empty string
+    if (searchQuery && searchQuery.trim()) {
+        filteredItems = filteredItems.filter((item: TodoItem) => {
+            return (
+                item.title.includes(searchQuery) ||
+                (item.description && item.description.includes(searchQuery))
+            );
+        });
+    }
+
+    console.log("filterAndSearch, returning", filteredItems);
+    return filteredItems;
+};
+
+export const arrayIsNullOrEmpty = (array: TodoItem[]) => {
+    if (!array) return true;
+    if (array.length === 0) return true;
+
+    return false;
+};
+
+export const stringIsNullOrEmpty = (str?: string) => {
+    return str && str.trim();
 };
 
 const itemsWithSelectedSetTo = (items: TodoItem[], selected: boolean) => {

@@ -21,6 +21,7 @@ const CreateTodoDialog: React.FC<Props> = props => {
         addButton: {
             width: "150px",
             height: "50px",
+            marginLeft: "1%"
         },
         input: {
             margin: "3% auto"
