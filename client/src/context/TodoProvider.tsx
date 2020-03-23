@@ -5,7 +5,9 @@ import {
     TodoState,
     ActionType,
     TodoItemToCreate,
-    Filter
+    Filter,
+    OrderBy,
+    OrderDirection
 } from "../models/models";
 import axios from "axios";
 import {
@@ -26,6 +28,8 @@ const initialState: TodoState = {
     currentPage: 1,
     filter: Filter.ALL,
     searchQuery: "",
+    orderBy: OrderBy.DATE,
+    orderDirection: OrderDirection.ASC,
     loading: false,
     error: undefined,
 
@@ -39,7 +43,9 @@ const initialState: TodoState = {
     getItemDetails: (id: string | number) => {},
     goToPage: (page: number) => {},
     onChangeFilter: (filter: Filter) => {},
-    onChangeSearchQuery: (searchQuery: string) => {}
+    onChangeSearchQuery: (searchQuery: string) => {},
+    onChangeOrderBy: (orderBy: OrderBy) => {},
+    onChangeOrderDirection: (orderDirection: OrderDirection) => {}
 };
 
 const rootApiUrl = "http://localhost:8080";
@@ -302,6 +308,17 @@ export const TodoProvider: React.FC = (props: any) => {
         });
     };
 
+    const onChangeOrderBy = (orderBy: OrderBy) => {
+        dispatch({ type: ActionType.ON_CHANGE_ORDER_BY, payload: { orderBy } });
+    };
+
+    const onChangeOrderDirection = (orderDirection: OrderDirection) => {
+        dispatch({
+            type: ActionType.ON_CHANGE_ORDER_DIRECTION,
+            payload: { orderDirection }
+        });
+    };
+
     return (
         <TodoContext.Provider
             value={{
@@ -315,6 +332,8 @@ export const TodoProvider: React.FC = (props: any) => {
                 selectedCount: state.selectedCount,
                 itemsPerPage: state.itemsPerPage,
                 currentPage: state.currentPage,
+                orderBy: state.orderBy,
+                orderDirection: state.orderDirection,
                 fetchAll,
                 createTodo,
                 updateTodo,
@@ -325,7 +344,9 @@ export const TodoProvider: React.FC = (props: any) => {
                 getItemDetails,
                 goToPage,
                 onChangeFilter,
-                onChangeSearchQuery
+                onChangeSearchQuery,
+                onChangeOrderBy,
+                onChangeOrderDirection
             }}
         >
             {props.children}

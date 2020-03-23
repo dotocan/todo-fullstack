@@ -1,6 +1,12 @@
 import React, { useContext, useEffect } from "react";
 
-import { Filter } from "../../models/models";
+import {
+    Filter,
+    OrderBy,
+    OrderDirection,
+    TodoItem,
+    Order
+} from "../../models/models";
 import { makeStyles, TextField } from "@material-ui/core";
 import { TodoContext } from "../../context/TodoProvider";
 import EmptyState from "../states/EmptyState";
@@ -8,7 +14,7 @@ import ErrorState from "../states/ErrorState";
 import CreateTodoDialog from "../dialogs/CreateTodoDialog";
 import BatchDeleteConfirmationDialog from "../dialogs/BatchDeleteConfirmationDialog";
 import TodoTable from "./TodoTable";
-import { arrayIsNullOrEmpty } from "../../context/helperMethods";
+import { arrayIsNullOrEmpty, orderItems } from "../../context/helperMethods";
 
 const Home: React.FC = () => {
     const useStyles = makeStyles({
@@ -33,6 +39,8 @@ const Home: React.FC = () => {
         currentPage,
         filter,
         searchQuery,
+        orderBy,
+        orderDirection,
         fetchAll,
         createTodo,
         updateTodo,
@@ -43,6 +51,8 @@ const Home: React.FC = () => {
         goToPage,
         onChangeFilter,
         onChangeSearchQuery,
+        onChangeOrderBy,
+        onChangeOrderDirection,
         loading,
         error
     } = context;
@@ -63,7 +73,19 @@ const Home: React.FC = () => {
         onChangeFilter(event.target.value as Filter);
     };
 
-    console.log("HOME filtereItems", filteredItems);
+    const onOrderByChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onChangeOrderBy(event.target.value as OrderBy);
+    };
+
+    const onOrderDirectionChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        onChangeOrderDirection(event.target.value as OrderDirection);
+    };
+
+    const sortItems = () => {
+        return orderItems(filteredItems, orderBy, orderDirection);
+    };
 
     return (
         <>
@@ -119,12 +141,64 @@ const Home: React.FC = () => {
                 )}
             </div>
 
+            <div className={classes.actionsContainer}>
+                {!arrayIsNullOrEmpty(items) ? (
+                    <>
+                        <TextField
+                            id="order-direction"
+                            select
+                            label="Order direction"
+                            value={orderDirection}
+                            onChange={onOrderDirectionChange}
+                            SelectProps={{
+                                native: true
+                            }}
+                            variant="outlined"
+                            className={classes.action}
+                        >
+                            <option
+                                key={OrderDirection.ASC}
+                                value={OrderDirection.ASC}
+                            >
+                                Ascending
+                            </option>
+                            <option
+                                key={OrderDirection.DESC}
+                                value={OrderDirection.DESC}
+                            >
+                                Descending
+                            </option>
+                        </TextField>
+
+                        <TextField
+                            id="order-by"
+                            select
+                            label="Order by"
+                            value={orderBy}
+                            onChange={onOrderByChange}
+                            SelectProps={{
+                                native: true
+                            }}
+                            variant="outlined"
+                            className={classes.action}
+                        >
+                            <option key={OrderBy.DATE} value={OrderBy.DATE}>
+                                Date created
+                            </option>
+                            <option key={OrderBy.TITLE} value={OrderBy.TITLE}>
+                                Title
+                            </option>
+                        </TextField>
+                    </>
+                ) : null}
+            </div>
+
             {error ? (
                 <ErrorState error={error} />
             ) : !arrayIsNullOrEmpty(items) ? (
                 <>
                     <TodoTable
-                        items={filteredItems}
+                        items={sortItems()}
                         selectedCount={selectedCount}
                         itemsPerPage={itemsPerPage}
                         currentPage={currentPage}

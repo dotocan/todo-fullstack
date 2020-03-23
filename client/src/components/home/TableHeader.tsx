@@ -1,5 +1,6 @@
 import React from "react";
 import { TableHead, TableRow, TableCell, Checkbox } from "@material-ui/core";
+import { ArrowDownward } from "@material-ui/icons";
 
 interface Props {
     allSelected: boolean;
@@ -23,6 +24,7 @@ const TableHeader: React.FC<Props> = props => {
                 </TableCell>
                 <TableCell>Title</TableCell>
                 <TableCell>Completed</TableCell>
+                <TableCell>Created</TableCell>
                 <TableCell>View</TableCell>
                 <TableCell>Toggle completed</TableCell>
                 <TableCell>Delete</TableCell>

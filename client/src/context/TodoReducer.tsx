@@ -111,6 +111,20 @@ export default (state: TodoState, action: TodoAction) => {
             };
         }
 
+        case ActionType.ON_CHANGE_ORDER_BY: {
+            return {
+                ...state,
+                orderBy: payload.orderBy
+            };
+        }
+
+        case ActionType.ON_CHANGE_ORDER_DIRECTION: {
+            return {
+                ...state,
+                orderDirection: payload.orderDirection
+            };
+        }
+
         default:
             return state;
     }

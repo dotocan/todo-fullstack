@@ -3,13 +3,29 @@ export interface TodoItem {
     title: string;
     description?: string;
     completed: boolean;
-    created?: Date;
+    created: string;
     selected: boolean;
 }
 
 export interface TodoItemToCreate {
     title: string;
     description: string;
+}
+
+export interface Order {
+    orderBy: OrderBy;
+    orderDirection: OrderDirection;
+}
+
+export enum OrderBy {
+    TITLE = "TITLE",
+    DATE = "DATE",
+    COMPLETED = "COMPLETED"
+}
+
+export enum OrderDirection {
+    ASC = "ASC",
+    DESC = "DESC"
 }
 
 export interface TodoState {
@@ -20,6 +36,8 @@ export interface TodoState {
     currentPage: number;
     filter: Filter;
     searchQuery: string;
+    orderBy: OrderBy;
+    orderDirection: OrderDirection;
     details?: TodoItem;
     loading: boolean;
     error?: TodoError;
@@ -35,6 +53,8 @@ export interface TodoState {
     goToPage: (page: number) => void;
     onChangeFilter: (filter: Filter) => void;
     onChangeSearchQuery: (searchQuery: string) => void;
+    onChangeOrderBy: (orderBy: OrderBy) => void;
+    onChangeOrderDirection: (orderDirection: OrderDirection) => void;
 }
 
 export interface TodoAction {
@@ -74,5 +94,7 @@ export enum ActionType {
     GET_ITEM_DETAILS = "GET_ITEM_DETAILS",
     CHANGE_PAGE = "CHANGE_PAGE",
     ON_CHANGE_FILTER = "ON_CHANGE_FILTER",
-    ON_CHANGE_SEARCH_QUERY = "ON_CHANGE_SEARCH_QUERY"
+    ON_CHANGE_SEARCH_QUERY = "ON_CHANGE_SEARCH_QUERY",
+    ON_CHANGE_ORDER_BY = "ON_CHANGE_ORDER_BY",
+    ON_CHANGE_ORDER_DIRECTION = "ON_CHANGE_ORDER_DIRECTION"
 }

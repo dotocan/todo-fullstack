@@ -8,7 +8,7 @@ import {
     Button
 } from "@material-ui/core";
 import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
-import { Visibility } from "@material-ui/icons";
+import { Visibility, ArrowUpward, ArrowDownward } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -51,8 +51,11 @@ const ItemRow: React.FC<Props> = (props: Props) => {
                     onChange={onSelect}
                 />
             </TableCell>
-            <TableCell>{item.title}</TableCell>
+            <TableCell>
+                {item.title}
+            </TableCell>
             <TableCell>{item.completed ? "YES" : "NO"}</TableCell>
+            <TableCell>{item.created}</TableCell>
             <TableCell>
                 <Link to={`details/${item.id}`}>
                     <Visibility />

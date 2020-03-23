@@ -1,4 +1,4 @@
-import { TodoItem, Filter } from "../models/models";
+import { TodoItem, Filter, OrderBy, OrderDirection } from "../models/models";
 
 export const updateTodoInItems = (updatedItem: TodoItem, items: TodoItem[]) => {
     return items.map((item: TodoItem) => {
@@ -112,6 +112,64 @@ export const arrayIsNullOrEmpty = (array: TodoItem[]) => {
     if (array.length === 0) return true;
 
     return false;
+};
+
+export const orderItems = (
+    items: TodoItem[],
+    orderBy: OrderBy,
+    orderDirection: OrderDirection
+) => {
+    if (orderBy === OrderBy.DATE) {
+        if (orderDirection === OrderDirection.ASC) {
+            return items.slice().sort((i1: TodoItem, i2: TodoItem) => {
+                return (
+                    (new Date(i1.created) as any) -
+                    (new Date(i2.created) as any)
+                );
+            });
+        }
+
+        if (orderDirection === OrderDirection.DESC) {
+            return items.slice().sort((i1: TodoItem, i2: TodoItem) => {
+                return (
+                    (new Date(i2.created) as any) -
+                    (new Date(i1.created) as any)
+                );
+            });
+        }
+    }
+
+    if (orderBy === OrderBy.TITLE) {
+        if (orderDirection === OrderDirection.ASC) {
+            return items.slice().sort(compareTitleAsc);
+        }
+
+        if (orderDirection === OrderDirection.DESC) {
+            return items.slice().sort(compareTitleDesc);
+        }
+    }
+
+    return items;
+};
+
+const compareTitleDesc = (i1: TodoItem, i2: TodoItem) => {
+    if (i2.title < i1.title) {
+        return -1;
+    }
+    if (i1.title < i2.title) {
+        return 1;
+    }
+    return 0;
+};
+
+const compareTitleAsc = (i1: TodoItem, i2: TodoItem) => {
+    if (i1.title < i2.title) {
+        return -1;
+    }
+    if (i2.title < i1.title) {
+        return 1;
+    }
+    return 0;
 };
 
 export const stringIsNullOrEmpty = (str?: string) => {
