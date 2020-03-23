@@ -7,6 +7,7 @@ import {
     Checkbox,
     Typography
 } from "@material-ui/core";
+import UnsavedChangesDialog from "../dialogs/UnsavedChangesDialog";
 
 interface Props {
     item: TodoItem;
@@ -68,6 +69,14 @@ const DetailsEdit: React.FC<Props> = props => {
         props.toggleEditMode();
     };
 
+    const hasUnsavedChanges = () => {
+        if (tempItem.title !== item.title) return true;
+        if (tempItem.description !== item.description) return true;
+        if (tempItem.completed !== item.completed) return true;
+
+        return false;
+    };
+
     return (
         <>
             <TextField
@@ -99,9 +108,11 @@ const DetailsEdit: React.FC<Props> = props => {
             </div>
 
             <div className={classes.row}>
-                <Button color="secondary" onClick={props.toggleEditMode}>
-                    Cancel
-                </Button>
+                <UnsavedChangesDialog
+                    unsavedChanges={hasUnsavedChanges()}
+                    toggleEditMode={props.toggleEditMode}
+                />
+
                 <Button variant="outlined" color="primary" onClick={updateTodo}>
                     Save changes
                 </Button>
