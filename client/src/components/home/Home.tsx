@@ -1,12 +1,6 @@
 import React, { useContext, useEffect } from "react";
 
-import {
-    Filter,
-    OrderBy,
-    OrderDirection,
-    TodoItem,
-    Order
-} from "../../models/models";
+import { Filter, OrderBy, OrderDirection } from "../../models/models";
 import { makeStyles, TextField } from "@material-ui/core";
 import { TodoContext } from "../../context/TodoProvider";
 import EmptyState from "../states/EmptyState";
